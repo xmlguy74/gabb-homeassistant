@@ -1,3 +1,4 @@
 requests
 aiohttp
 pydantic
+git+https://github.com/xmlguy74/gabb.git@main
