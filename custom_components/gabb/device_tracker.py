@@ -6,6 +6,8 @@ from typing import Any, Callable, Dict, Optional
 import voluptuous as vol
 import datetime
 
+from homeassistant.components.device_tracker import SOURCE_TYPE_GPS
+from homeassistant.components.device_tracker.config_entry import TrackerEntity
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.components.sensor import PLATFORM_SCHEMA
 from homeassistant.helpers.entity import Entity
@@ -45,20 +47,20 @@ async def async_setup_platform(
     """Set up the sensor platform."""
     session = async_get_clientsession(hass)
 
-    sensors = []
+    trackers = []
     _LOGGER.info("Found config for gabb " + config[CONF_NAME])
     
-    sensors.append(
-        GabbDeviceTracker(
+    trackers.append(
+        GabbDevice(
             "Abby", session, config[CONF_USERNAME], config[CONF_PASSWORD], "1234"
         )
     )
 
-    if len(sensors) > 0:
-        async_add_entities(sensors, update_before_add=True)
+    if len(trackers) > 0:
+        async_add_entities(trackers, update_before_add=True)
 
 
-class GabbDeviceTracker(Entity):
+class GabbDevice(TrackerEntity):
     """Representation of a Gabb device tracker."""
 
     def __init__(self,
@@ -95,8 +97,20 @@ class GabbDeviceTracker(Entity):
         return self._available
 
     @property
-    def state(self) -> Optional[str]:
-        return self._state
+    def latitude(self):
+        return "35.649654"
+
+    @property
+    def longitude(self):
+        return "-78.883079"
+
+    # @property
+    # def icon(self):
+    #     return "mdi:map-marker-outline"
+
+    @property
+    def source_type(self):
+        return SOURCE_TYPE_GPS
 
     @property
     def extra_state_attributes(self) -> Dict[str, Any]:
@@ -105,9 +119,9 @@ class GabbDeviceTracker(Entity):
     async def async_update(self):
         try:
             # Set state to something meaningful? new date?
-            self._state = datetime.datetime.now()
+            #self._state = datetime.datetime.now()
             #self.attrs["movies"] = movies
             self._available = True
         except:
             self._available = False
-            _LOGGER.exception("Error retrieving data from movie feeds.")
+            _LOGGER.exception("Error retrieving data from gabb.")
