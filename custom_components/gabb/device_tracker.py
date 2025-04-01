@@ -7,6 +7,11 @@ import voluptuous as vol
 import datetime
 
 from homeassistant.components.device_tracker import SourceType
+from homeassistant.components.device_tracker.const import (
+    CONF_CONSIDER_HOME,
+    CONF_NEW_DEVICE_DEFAULTS,
+)
+from homeassistant.components.device_tracker.legacy import NEW_DEVICE_DEFAULTS_SCHEMA
 from homeassistant.components.device_tracker.config_entry import TrackerEntity
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.components.sensor import PLATFORM_SCHEMA
@@ -34,9 +39,10 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
         vol.Required(CONF_NAME): cv.string,
         vol.Required(CONF_USERNAME): cv.string,
         vol.Required(CONF_PASSWORD): cv.string,
+        vol.Optional(CONF_CONSIDER_HOME, default=180): cv.positive_int,
+        vol.Optional(CONF_NEW_DEVICE_DEFAULTS, default={}): NEW_DEVICE_DEFAULTS_SCHEMA,
     }
 )
-
 
 async def async_setup_platform(
     hass: HomeAssistant,
@@ -77,7 +83,7 @@ class GabbDevice(TrackerEntity):
         self.attrs: Dict[str, Any] = {}
         self._name = name
         self._device_id = device_id
-        self._state = None
+        # self._state = None
         self._available = True
         
 
@@ -112,9 +118,9 @@ class GabbDevice(TrackerEntity):
     def source_type(self):
         return SourceType.GPS
 
-    @property
-    def extra_state_attributes(self) -> Dict[str, Any]:
-        return self.attrs
+    # @property
+    # def extra_state_attributes(self) -> Dict[str, Any]:
+    #     return self.attrs
 
     async def async_update(self):
         try:
