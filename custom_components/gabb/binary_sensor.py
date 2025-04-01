@@ -6,7 +6,7 @@ from typing import Any, Callable, Dict, Optional
 import voluptuous as vol
 import datetime
 
-from homeassistant.components.sensor import PLATFORM_SCHEMA
+from homeassistant.components.binary_sensor import PLATFORM_SCHEMA
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.entity import Entity
 from homeassistant.helpers.typing import (
@@ -73,7 +73,7 @@ class GabbDevice(Entity):
         self.attrs: Dict[str, Any] = {}
         self._name = name
         self._device_id = device_id
-        self._state = None
+        self._state = False
         self._available = True
         
 
@@ -92,14 +92,6 @@ class GabbDevice(Entity):
         """Return True if entity is available."""
         return self._available
 
-    @property
-    def lat(self):
-        return "35.649654"
-
-    @property
-    def lon(self):
-        return "-78.883079"
-
     # @property
     # def icon(self):
     #     return "mdi:map-marker-outline"
@@ -116,9 +108,9 @@ class GabbDevice(Entity):
     async def async_update(self):
         try:
             # Set state to something meaningful? new date?
-            self._state = datetime.datetime.now()
-            self.attrs["latitiude"] = self.lat
-            self.attrs["longitude"] = self.lon
+            self._state = False
+            self.attrs["latitiude"] = "35.649654"
+            self.attrs["longitude"] = "-78.883079"
             self.attrs["gps_accuracy"] = 0
             self._available = True
         except:
