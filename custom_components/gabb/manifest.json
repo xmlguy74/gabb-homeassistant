@@ -1,0 +1,13 @@
+{
+  "domain": "gabb",
+  "name": "Gabb",
+  "version": "1.0.0",
+  "documentation": "https://github.com/xmlguy74/gabb-homeassistant#readme",
+  "issue_tracker": "https://github.com/xmlguy74/gabb-homeassistant/issues",
+  "dependencies": [],
+  "requirements": [],
+  "codeowners": ["@xmlguy74"],
+  "iot_class": "local_polling",
+  "homeassistant": "2023.1.0",
+  "config_flow": true
+}
