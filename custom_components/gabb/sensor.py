@@ -6,9 +6,7 @@ from typing import Any, Callable, Dict, Optional
 import voluptuous as vol
 import datetime
 
-from homeassistant.components.device_tracker import SourceType
-from homeassistant.components.device_tracker.legacy import PLATFORM_SCHEMA
-from homeassistant.components.device_tracker.config_entry import TrackerEntity
+from homeassistant.components.sensor import PLATFORM_SCHEMA
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.entity import Entity
 from homeassistant.helpers.typing import (
@@ -26,8 +24,7 @@ from homeassistant.const import (
 
 _LOGGER = logging.getLogger(__name__)
 
-# Time between updating data from movie feeds
-SCAN_INTERVAL = datetime.timedelta(minutes=120)
+SCAN_INTERVAL = datetime.timedelta(minutes=300)
 
 PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
     {
@@ -51,7 +48,7 @@ async def async_setup_platform(
     
     trackers.append(
         GabbDevice(
-            "Abby", session, config[CONF_USERNAME], config[CONF_PASSWORD], "1234"
+            "Abby", session, config[CONF_USERNAME], config[CONF_PASSWORD], "1234",
         )
     )
 
@@ -59,7 +56,7 @@ async def async_setup_platform(
         async_add_entities(trackers, update_before_add=True)
 
 
-class GabbDevice(TrackerEntity):
+class GabbDevice(Entity):
     """Representation of a Gabb device tracker."""
 
     def __init__(self,
@@ -76,7 +73,7 @@ class GabbDevice(TrackerEntity):
         self.attrs: Dict[str, Any] = {}
         self._name = name
         self._device_id = device_id
-        # self._state = None
+        self._state = None
         self._available = True
         
 
@@ -96,11 +93,11 @@ class GabbDevice(TrackerEntity):
         return self._available
 
     @property
-    def latitude(self):
+    def lat(self):
         return "35.649654"
 
     @property
-    def longitude(self):
+    def lon(self):
         return "-78.883079"
 
     # @property
@@ -108,18 +105,21 @@ class GabbDevice(TrackerEntity):
     #     return "mdi:map-marker-outline"
 
     @property
-    def source_type(self):
-        return SourceType.GPS
+    def state(self) -> str:
+        """Returns the unique ID of the entity."""
+        return self._state
 
-    # @property
-    # def extra_state_attributes(self) -> Dict[str, Any]:
-    #     return self.attrs
+    @property
+    def extra_state_attributes(self) -> Dict[str, Any]:
+        return self.attrs
 
     async def async_update(self):
         try:
             # Set state to something meaningful? new date?
-            #self._state = datetime.datetime.now()
-            #self.attrs["movies"] = movies
+            self._state = datetime.datetime.now()
+            self.attrs["latitiude"] = self.lat
+            self.attrs["longitude"] = self.lon
+            self.attrs["gps_accuracy"] = 0
             self._available = True
         except:
             self._available = False
