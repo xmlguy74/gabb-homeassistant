@@ -108,7 +108,7 @@ class GabbDevice(Entity):
     async def async_update(self):
         try:
             # Set state to something meaningful? new date?
-            self._state = False
+            self._state = True
             self.attrs["latitiude"] = "35.649654"
             self.attrs["longitude"] = "-78.883079"
             self.attrs["gps_accuracy"] = 0
