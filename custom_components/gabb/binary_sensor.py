@@ -54,7 +54,7 @@ def setup_platform(
     
     # Loop through the devices and create a GabbDevice for each one
     for device in map.data.Devices:
-        _LOGGER.info("Found device " + device.id)
+        _LOGGER.info("Found device " + str(device.id))
         trackers.append(
             GabbDevice(
                 device.firstName, config[CONF_USERNAME], config[CONF_PASSWORD], device.id,
@@ -72,14 +72,14 @@ class GabbDevice(Entity):
         name: str,
         username: str,
         password: str,
-        device_id: str
+        device_id: int
     ):
         super().__init__()
         self.attrs: Dict[str, Any] = {}
 
         self._username = username
         self._password = password
-        self._name = name
+        self._name = name + "_" + str(device_id)
         self._device_id = device_id
         self._state = False
         self._available = True
@@ -88,12 +88,12 @@ class GabbDevice(Entity):
     @property
     def name(self) -> str:
         """Return the name of the entity."""
-        return self._name + "_" + self._device_id
+        return self._name
     
     @property
     def unique_id(self) -> str:
         """Returns the unique ID of the entity."""
-        return self._name + "_" + self._device_id
+        return self._name
     
     @property
     def available(self) -> bool:
@@ -122,7 +122,7 @@ class GabbDevice(Entity):
                     _LOGGER.error("Device not found in map data.")
                     self._available = False
                 else:                    
-                    _LOGGER.info("Found device " + device.id)
+                    _LOGGER.info("Found device " + str(device.id))
                     self._state = True
                     self.attrs["source_type"] = "gps"                        
                     self.attrs["latitude"] = device.latitude
