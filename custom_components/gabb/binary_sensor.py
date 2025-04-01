@@ -22,9 +22,11 @@ from homeassistant.const import (
     CONF_PASSWORD,
 )
 
+from gabb import GabbClient
+
 _LOGGER = logging.getLogger(__name__)
 
-SCAN_INTERVAL = datetime.timedelta(minutes=300)
+SCAN_INTERVAL = datetime.timedelta(minutes=5)
 
 PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
     {
@@ -46,11 +48,21 @@ async def async_setup_platform(
     trackers = []
     _LOGGER.info("Found config for gabb " + config[CONF_NAME])
     
-    trackers.append(
-        GabbDevice(
-            "Abby", session, config[CONF_USERNAME], config[CONF_PASSWORD], "1234",
+    # Create a GabbClient instance and get the devices
+    gabb_client = GabbClient(config[CONF_USERNAME], config[CONF_PASSWORD])
+    map = gabb_client.get_map().json()
+
+    if map.status != 200:
+        raise Exception("Error getting map data from gabb. " + map.message)
+    
+    # Loop through the devices and create a GabbDevice for each one
+    for device in map.data.Devices:
+        _LOGGER.info("Found device " + device.id)
+        trackers.append(
+            GabbDevice(
+                device.firstName, session, config[CONF_USERNAME], config[CONF_PASSWORD], device.id,
+            )
         )
-    )
 
     if len(trackers) > 0:
         async_add_entities(trackers, update_before_add=True)
@@ -68,9 +80,10 @@ class GabbDevice(Entity):
     ):
         super().__init__()
         self.session = session
-        self.username = username
-        self.password = password
         self.attrs: Dict[str, Any] = {}
+
+        self._username = username
+        self._password = password
         self._name = name
         self._device_id = device_id
         self._state = False
@@ -80,21 +93,17 @@ class GabbDevice(Entity):
     @property
     def name(self) -> str:
         """Return the name of the entity."""
-        return self._name
+        return self._name + "_" + self._device_id
     
     @property
     def unique_id(self) -> str:
         """Returns the unique ID of the entity."""
-        return self._device_id
+        return self._name + "_" + self._device_id
     
     @property
     def available(self) -> bool:
         """Return True if entity is available."""
         return self._available
-
-    # @property
-    # def icon(self):
-    #     return "mdi:map-marker-outline"
 
     @property
     def state(self) -> str:
@@ -107,13 +116,25 @@ class GabbDevice(Entity):
 
     async def async_update(self):
         try:
-            # Set state to something meaningful? new date?
-            self._state = True
-            self.attrs["source_type"] = "gps"                        
-            self.attrs["latitude"] = 35.647837348091294 
-            self.attrs["longitude"] = -78.88105368411128
-            self.attrs["gps_accuracy"] = 0
-            self._available = True
+            gabb_client = GabbClient(self.username, self.password)
+            map = gabb_client.get_map().json()
+            if map.status != 200:
+                _LOGGER.exception("Error getting map data from gabb. " + map.message)
+            else:                
+                # Loop through the devices and create a GabbDevice for each one
+                device = next((d for d in map.data.Devices if d.id == self._device_id), None)                
+                if device is None:
+                    _LOGGER.error("Device not found in map data.")
+                    self._available = False
+                else:                    
+                    _LOGGER.info("Found device " + device.id)
+                    self._state = True
+                    self.attrs["source_type"] = "gps"                        
+                    self.attrs["latitude"] = device.latitude
+                    self.attrs["longitude"] = device.longitude
+                    self.attrs["gps_accuracy"] = 0
+                    self.attrs["battery_level"] = device.batteryLevel
+                    self._available = True
         except:
             self._available = False
             _LOGGER.exception("Error retrieving data from gabb.")
