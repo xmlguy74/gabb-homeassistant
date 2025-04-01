@@ -57,7 +57,7 @@ def setup_platform(
         _LOGGER.info("Found device " + str(device.id))
         trackers.append(
             GabbDevice(
-                device.firstName, config[CONF_USERNAME], config[CONF_PASSWORD], device.id,
+                device.firstName, device.id, config[CONF_USERNAME], config[CONF_PASSWORD],
             )
         )
 
@@ -70,9 +70,9 @@ class GabbDevice(Entity):
 
     def __init__(self,
         name: str,
+        device_id: int,
         username: str,
-        password: str,
-        device_id: int
+        password: str
     ):
         super().__init__()
         self.attrs: Dict[str, Any] = {}
@@ -111,7 +111,7 @@ class GabbDevice(Entity):
 
     def update(self):
         try:
-            gabb_client = GabbClient(self.username, self.password)
+            gabb_client = GabbClient(self._username, self._password)
             map = gabb_client.get_map().json(object_hook=lambda d: SimpleNamespace(**d))
             if map.status != 200:
                 _LOGGER.exception("Error getting map data from gabb. " + map.message)
