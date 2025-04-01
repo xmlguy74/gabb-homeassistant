@@ -7,7 +7,6 @@ import voluptuous as vol
 import datetime
 
 from homeassistant.components.binary_sensor import PLATFORM_SCHEMA
-from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.entity import Entity
 from homeassistant.helpers.typing import (
     ConfigType,
@@ -36,15 +35,13 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
     }
 )
 
-async def async_setup_platform(
+def setup_platform(
     hass: HomeAssistant,
     config: ConfigType,
-    async_add_entities: Callable,
+    add_entities: Callable,
     discovery_info: Optional[DiscoveryInfoType] = None,
 ) -> None:
     """Set up the sensor platform."""
-    session = async_get_clientsession(hass)
-
     trackers = []
     _LOGGER.info("Found config for gabb " + config[CONF_NAME])
     
@@ -60,12 +57,12 @@ async def async_setup_platform(
         _LOGGER.info("Found device " + device.id)
         trackers.append(
             GabbDevice(
-                device.firstName, session, config[CONF_USERNAME], config[CONF_PASSWORD], device.id,
+                device.firstName, config[CONF_USERNAME], config[CONF_PASSWORD], device.id,
             )
         )
 
     if len(trackers) > 0:
-        async_add_entities(trackers, update_before_add=True)
+        add_entities(trackers, update_before_add=True)
 
 
 class GabbDevice(Entity):
@@ -73,13 +70,11 @@ class GabbDevice(Entity):
 
     def __init__(self,
         name: str,
-        session: aiohttp.client.ClientSession,
         username: str,
         password: str,
         device_id: str
     ):
         super().__init__()
-        self.session = session
         self.attrs: Dict[str, Any] = {}
 
         self._username = username
@@ -114,7 +109,7 @@ class GabbDevice(Entity):
     def extra_state_attributes(self) -> Dict[str, Any]:
         return self.attrs
 
-    async def async_update(self):
+    def update(self):
         try:
             gabb_client = GabbClient(self.username, self.password)
             map = gabb_client.get_map().json()

@@ -6,7 +6,7 @@
   "issue_tracker": "https://github.com/xmlguy74/gabb-homeassistant/issues",
   "dependencies": [],
   "requirements": [
-    "git+https://github.com/xmlguy74/gabb.git@main"
+    "gabb @ git+https://github.com/xmlguy74/gabb.git"
   ],
   "codeowners": ["@xmlguy74"],
   "iot_class": "local_polling",
