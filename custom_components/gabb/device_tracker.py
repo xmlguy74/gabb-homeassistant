@@ -6,14 +6,14 @@ from typing import Any, Callable, Dict, Optional
 import voluptuous as vol
 import datetime
 
-from homeassistant.components.device_tracker import SOURCE_TYPE_GPS
+from homeassistant.components.device_tracker import SourceType
 from homeassistant.components.device_tracker.config_entry import TrackerEntity
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.components.sensor import PLATFORM_SCHEMA
 from homeassistant.helpers.entity import Entity
 from homeassistant.helpers.typing import (
     ConfigType,
-    DiscoveryInfoType
+    DiscoveryInfoType,
 )
 from homeassistant.core import HomeAssistant
 
@@ -110,7 +110,7 @@ class GabbDevice(TrackerEntity):
 
     @property
     def source_type(self):
-        return SOURCE_TYPE_GPS
+        return SourceType.GPS
 
     @property
     def extra_state_attributes(self) -> Dict[str, Any]:
