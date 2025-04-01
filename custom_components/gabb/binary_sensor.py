@@ -109,9 +109,9 @@ class GabbDevice(Entity):
         try:
             # Set state to something meaningful? new date?
             self._state = True
-            self.attrs["source_type"] = "gps"
-            self.attrs["latitude"] = 35.649654
-            self.attrs["longitude"] = -78.883079
+            self.attrs["source_type"] = "gps"                        
+            self.attrs["latitude"] = 35.647837348091294 
+            self.attrs["longitude"] = -78.88105368411128
             self.attrs["gps_accuracy"] = 0
             self._available = True
         except:
