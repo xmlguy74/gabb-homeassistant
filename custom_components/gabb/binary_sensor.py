@@ -1,11 +1,11 @@
 """Posterfy sensor platform."""
 import logging
 import datetime
-import aiohttp
 from typing import Any, Callable, Dict, Optional
 import voluptuous as vol
 import datetime
 
+from types import SimpleNamespace
 from homeassistant.components.binary_sensor import PLATFORM_SCHEMA
 from homeassistant.helpers.entity import Entity
 from homeassistant.helpers.typing import (
@@ -47,7 +47,7 @@ def setup_platform(
     
     # Create a GabbClient instance and get the devices
     gabb_client = GabbClient(config[CONF_USERNAME], config[CONF_PASSWORD])
-    map = gabb_client.get_map().json()
+    map = gabb_client.get_map().json(object_hook=lambda d: SimpleNamespace(**d))
 
     if map.status != 200:
         raise Exception("Error getting map data from gabb. " + map.message)
@@ -112,7 +112,7 @@ class GabbDevice(Entity):
     def update(self):
         try:
             gabb_client = GabbClient(self.username, self.password)
-            map = gabb_client.get_map().json()
+            map = gabb_client.get_map().json(object_hook=lambda d: SimpleNamespace(**d))
             if map.status != 200:
                 _LOGGER.exception("Error getting map data from gabb. " + map.message)
             else:                
