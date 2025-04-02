@@ -127,7 +127,7 @@ class GabbDevice(Entity):
                     self.attrs["source_type"] = "gps"                        
                     self.attrs["latitude"] = device.latitude
                     self.attrs["longitude"] = device.longitude
-                    self.attrs["gps_accuracy"] = 0
+                    self.attrs["gps_accuracy"] = device.radius
                     self.attrs["battery_level"] = device.batteryLevel
                     self._available = True
         except:
